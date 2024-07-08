@@ -1,6 +1,16 @@
 from stl import mesh
 import numpy as np
 
+# Constants for easy adjustment
+A4_WIDTH_MM = 210
+A4_HEIGHT_MM = 297
+DOT_DIAMETER_MM = 1.5
+DOT_HEIGHT_MM = 0.5
+DOT_SPACING_MM = 2.5
+LINE_SPACING_MM = 5  # Spacing between lines of Braille
+LETTER_SPACING_MM = 2.5  # Spacing between letters
+
+# Braille dictionary
 braille_dict = {
     'a': '100000', 'b': '101000', 'c': '110000', 'd': '110100', 'e': '100100', 'f': '111000',
     'g': '111100', 'h': '101100', 'i': '011000', 'j': '011100', 'k': '100010', 'l': '101010',
@@ -39,12 +49,6 @@ def translate_to_braille(text):
     return braille_text
 
 def create_braille_stl(braille_text, filename="braille_output.stl"):
-    A4_WIDTH_MM = 210
-    A4_HEIGHT_MM = 297
-    DOT_DIAMETER_MM = 1.5
-    DOT_HEIGHT_MM = 0.5
-    DOT_SPACING_MM = 2.5
-
     vertices = []
     faces = []
     x_offset = 10
@@ -52,7 +56,10 @@ def create_braille_stl(braille_text, filename="braille_output.stl"):
 
     for braille_char in braille_text:
         if braille_char == '000000':  # Handle space character
-            x_offset += DOT_SPACING_MM * 2.5  # Move to the next character column
+            x_offset += DOT_SPACING_MM * LETTER_SPACING_MM  # Move to the next character column
+            if x_offset > A4_WIDTH_MM - 20:
+                x_offset = 10  # Reset to left margin
+                y_offset += DOT_SPACING_MM * LINE_SPACING_MM  # Move to the next row
             continue
         
         for i, dot in enumerate(braille_char):
@@ -83,10 +90,10 @@ def create_braille_stl(braille_text, filename="braille_output.stl"):
                 faces.append([base_index + 3, base_index, base_index + 4])
                 faces.append([base_index + 3, base_index + 4, base_index + 7])
         
-        x_offset += DOT_SPACING_MM * 2.5  # Adjust for next character column
+        x_offset += DOT_SPACING_MM * LETTER_SPACING_MM  # Adjust for next character column
         if x_offset > A4_WIDTH_MM - 20:
             x_offset = 10  # Reset to left margin
-            y_offset += DOT_SPACING_MM * 5  # Move to the next row
+            y_offset += DOT_SPACING_MM * LINE_SPACING_MM  # Move to the next row
 
     vertices = np.array(vertices)
     faces = np.array(faces)
